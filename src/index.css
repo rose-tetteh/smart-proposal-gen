@@ -1,0 +1,427 @@
+@import 'tailwindcss';
+
+/*
+ * Bastion Proposal Generator: design tokens.
+ *
+ * Bastion's world: a fortified industrial yard. Deep rampart teal for ink and
+ * structure, beacon orange (the safety-orange of hard hats and barricades) for
+ * the primary action, galvanized zinc hairlines and blueprint-paper white.
+ * Depth is borders-only. The single exception is the proposal "paper" itself,
+ * which sits on the desk with a soft shadow because it IS a physical document.
+ *
+ * Beacon orange is reserved for the brand mark, the primary action and warnings.
+ */
+
+@theme {
+  --color-beacon: #c2410c;
+  --color-beacon-deep: #9a3412;
+  --color-beacon-wash: #fff4ed;
+  --color-rampart: #0e4a52;
+  --color-rampart-deep: #08343a;
+  --color-rampart-wash: #eef6f6;
+
+  --color-paper: #ffffff;
+  --color-paper-raised: #ffffff;
+  --color-paper-inset: #f7f7f5;
+  --color-paper-sunk: #efefec;
+  --color-sidebar: #f7f7f5;
+  --color-desk: #eceae5;
+
+  --color-ink: #14171f;
+  --color-ink-secondary: #454b59;
+  --color-ink-tertiary: #6b7280;
+  --color-ink-muted: #9aa1ae;
+
+  --color-rule: rgba(20, 23, 31, 0.1);
+  --color-rule-soft: rgba(20, 23, 31, 0.06);
+  --color-rule-strong: rgba(20, 23, 31, 0.16);
+
+  --color-ok: #1c6b3f;
+  --color-ok-wash: #f1f8f3;
+  --color-warn: #9a5b00;
+  --color-warn-wash: #fdf7ed;
+  --color-info: #0e4a52;
+  --color-info-wash: #eef6f6;
+  --color-muted: #4b5563;
+  --color-muted-wash: #f3f4f6;
+  --color-bad: #a3001a;
+  --color-bad-wash: #fdf2f3;
+  --color-amber: #eda100;
+
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+
+  --text-stamp: 0.6875rem;
+  --text-caption: 0.75rem;
+  --text-body: 0.875rem;
+  --text-h4: 1rem;
+  --text-h3: 1.125rem;
+  --text-h2: 1.375rem;
+  --text-h1: 1.75rem;
+
+  --radius-control: 6px;
+  --radius-record: 8px;
+  --radius-panel: 12px;
+
+  --ease-enter: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-move: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+:root[data-theme='dark'] {
+  --color-beacon: #fb8a4c;
+  --color-beacon-deep: #fdba8c;
+  --color-beacon-wash: #2b1709;
+  --color-rampart: #6cc6cf;
+  --color-rampart-deep: #a3dee3;
+  --color-rampart-wash: #0f2427;
+
+  --color-paper: #0e1116;
+  --color-paper-raised: #171b22;
+  --color-paper-inset: #10141a;
+  --color-paper-sunk: #1d222b;
+  --color-sidebar: #12161c;
+  --color-desk: #0a0c10;
+
+  --color-ink: #eceef2;
+  --color-ink-secondary: #a8afbd;
+  --color-ink-tertiary: #7c8494;
+  --color-ink-muted: #565e6d;
+
+  --color-rule: rgba(236, 238, 242, 0.1);
+  --color-rule-soft: rgba(236, 238, 242, 0.06);
+  --color-rule-strong: rgba(236, 238, 242, 0.18);
+
+  --color-ok: #4ade91;
+  --color-ok-wash: #0f2318;
+  --color-warn: #e8ad4f;
+  --color-warn-wash: #2a1f0d;
+  --color-info: #6cc6cf;
+  --color-info-wash: #0f2427;
+  --color-muted: #8b93a3;
+  --color-muted-wash: #1a1d23;
+  --color-bad: #ff5468;
+  --color-bad-wash: #2a1418;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+  #root {
+    height: 100%;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    letter-spacing: -0.011em;
+    margin: 0;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href],
+  summary,
+  select:not(:disabled),
+  label:has(input:is([type='checkbox'], [type='radio']):not(:disabled)) {
+    cursor: pointer;
+  }
+  :disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-rampart);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-rampart) 22%, transparent);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Rubber-stamp status label: tracked uppercase, hairline border. */
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.125rem 0.4375rem;
+    font-size: var(--text-stamp);
+    font-weight: 600;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+    line-height: 1.5;
+  }
+
+  .scroll-quiet {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-ink-muted) 55%, transparent) transparent;
+  }
+  .scroll-quiet:hover {
+    scrollbar-color: var(--color-ink-muted) transparent;
+  }
+
+  /* Hazard-tape rail: the left edge of anything that needs attention. */
+  .rail-warn {
+    background-image: repeating-linear-gradient(
+      135deg,
+      var(--color-warn) 0 4px,
+      transparent 4px 8px
+    );
+  }
+
+  /* Blueprint grid, used behind empty states and the sign-in card. */
+  .blueprint {
+    background-image:
+      linear-gradient(var(--color-rule-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-rule-soft) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* The proposal sheet: the only element with a real shadow. */
+  .sheet {
+    background: #ffffff;
+    color: #14171f;
+    box-shadow:
+      0 1px 2px rgba(20, 23, 31, 0.06),
+      0 8px 28px rgba(20, 23, 31, 0.08);
+  }
+  :root[data-theme='dark'] .sheet {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 12px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Document typography inside a sheet. Always light: it previews paper. */
+  .doc {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    line-height: 1.68;
+    color: #1d2230;
+  }
+  .doc h2 {
+    font-family: var(--font-sans);
+    font-size: 19px;
+    font-weight: 700;
+    color: #0e4a52;
+    letter-spacing: -0.01em;
+  }
+  .doc h3 {
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    font-weight: 650;
+    color: #0e4a52;
+    margin-top: 1.1em;
+  }
+  .doc p {
+    margin: 0.6em 0;
+  }
+  .doc ul {
+    margin: 0.5em 0 0.8em;
+    padding-left: 1.25em;
+    list-style: none;
+  }
+  .doc li {
+    position: relative;
+    margin: 0.25em 0;
+  }
+  .doc li::before {
+    content: '';
+    position: absolute;
+    left: -1em;
+    top: 0.72em;
+    width: 6px;
+    height: 6px;
+    background: #c2410c;
+  }
+  .doc strong {
+    font-weight: 700;
+    color: #14171f;
+  }
+  .doc table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.8em 0 1em;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+  .doc th {
+    text-align: left;
+    background: #0e4a52;
+    color: #fff;
+    font-weight: 600;
+    padding: 7px 9px;
+  }
+  .doc td {
+    padding: 7px 9px;
+    border-bottom: 1px solid #e3e5ea;
+    vertical-align: top;
+  }
+  .doc tr:nth-child(even) td {
+    background: #f7f8fb;
+  }
+  .doc .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin: 0.9em 0;
+  }
+
+  /* Markdown inside Bastion Assist chat bubbles. */
+  .chat-md p {
+    margin: 0.35em 0;
+  }
+  .chat-md ul {
+    margin: 0.35em 0;
+    padding-left: 1.1em;
+    list-style: disc;
+  }
+  .chat-md li {
+    margin: 0.15em 0;
+  }
+  .chat-md strong {
+    font-weight: 650;
+  }
+  .chat-md h3 {
+    font-size: 13px;
+    font-weight: 650;
+    margin-top: 0.5em;
+  }
+  .chat-md table {
+    font-size: 11.5px;
+    border-collapse: collapse;
+    margin: 0.4em 0;
+  }
+  .chat-md td,
+  .chat-md th {
+    border: 1px solid var(--color-rule);
+    padding: 2px 5px;
+    text-align: left;
+  }
+
+  .fade-up {
+    animation: fade-up 420ms var(--ease-enter) both;
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .pop-in {
+    animation: pop-in 220ms var(--ease-enter) both;
+  }
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.97) translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .caret::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: -2px;
+    background: #c2410c;
+    animation: caret 900ms steps(2) infinite;
+  }
+  @keyframes caret {
+    to {
+      visibility: hidden;
+    }
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--color-paper-sunk) 0%,
+      var(--color-paper-inset) 50%,
+      var(--color-paper-sunk) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  /* The logo is rampart + beacon ink; on the dark theme it sits on a white plate. */
+  :root[data-theme='dark'] .logo-plate {
+    background: #fff;
+    border-radius: 6px;
+    padding: 4px 8px;
+    box-sizing: content-box;
+  }
+
+  .brand-glow-hover {
+    display: inline-flex;
+    filter: drop-shadow(0 0 0 rgba(194, 65, 12, 0));
+    transition: filter 220ms var(--ease-enter);
+  }
+  .brand-glow-hover:hover {
+    filter: drop-shadow(0 0 7px rgba(194, 65, 12, 0.38));
+  }
+}
+
+@media print {
+  html,
+  body {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .sheet {
+    box-shadow: none !important;
+  }
+}

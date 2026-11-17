@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/ai/chat.ts": { "maxDuration": 300 },
+    "api/ai/models.ts": { "maxDuration": 30 },
+    "api/ai/status.ts": { "maxDuration": 10 },
+    "api/auth.ts": { "maxDuration": 10 }
+  },
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+}
