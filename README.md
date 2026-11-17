@@ -83,14 +83,17 @@ src/
 ├── shell/              AppShell (sidebar / editor rail), CommandPalette
 └── components/         UI primitives, icons, Markdown renderer, EngineBadge, ErrorBoundary
 server/
-└── amaliai.ts          AmaliAI proxy inside the Vite dev/preview server (holds the key, routes jobs)
+├── core.ts             the backend: AmaliAI proxy (holds the key, routes jobs) + team passcode
+└── amaliai.ts          mounts core.ts inside the Vite dev/preview server
+api/                    Vercel serverless functions; each one just calls server/core.ts
+vercel.json             build settings, function time limits, page-refresh rewrites
 ```
 
 Sections are stored as a small Markdown subset: paragraphs, `- bullets`, `### headings`, `**bold**`, `| tables |` and `[[placeholders]]`. One parser (`lib/markdown.ts`) feeds the on-screen preview, the Word export and the PDF export, so all three always match.
 
 ### The live AI engine (AmaliAI)
 
-`src/ai/provider.ts` defines `ProposalAI`. The app uses `RemoteProposalAI` (`src/ai/remote.ts`), which sends requests through the proxy in `server/amaliai.ts` to AmaliAI's OpenAI-compatible `/chat/completions` API. Only the proxy knows the key.
+`src/ai/provider.ts` defines `ProposalAI`. The app uses `RemoteProposalAI` (`src/ai/remote.ts`), which sends requests through the proxy in `server/core.ts` to AmaliAI's OpenAI-compatible `/chat/completions` API. Only the proxy knows the key.
 
 - **RFP reading:** the model returns the fields and requirements as JSON. Values that aren't in the allowed lists are dropped, and the offline reader fills any gaps.
 - **Section drafts:** the model gets a fact sheet (company facts, chosen projects and stats, approved content, the RFP) plus the offline draft as a starting point. It must keep that draft's facts and `[[placeholders]]`. Sections are drafted up to 4 at a time.
@@ -99,7 +102,7 @@ Sections are stored as a small Markdown subset: paragraphs, `- bullets`, `### he
 - **Project ranking** stays rule-based.
 - **Fallback:** if a model fails, the proxy tries that job's backups. If all of them fail, the request uses the offline engine. Either way the badge turns amber, and its tooltip says what happened. A bad key, a spending cap (429) or AmaliAI being unreachable affect every model, so no backup is tried and the app switches to offline. Click **Re-check connection** to retry.
 
-The proxy only runs inside `npm run dev` and `npm run preview`. A static deploy of `dist/` has no proxy, so it uses the offline engine. A production backend would host the same three endpoints (`/api/ai/status`, `/api/ai/models`, `/api/ai/chat`).
+The same backend code runs locally inside `npm run dev` / `npm run preview` and on Vercel as serverless functions (`api/`). A purely static copy of `dist/` has no backend, so it uses the offline engine. Any future backend (for example in Java) only has to provide the same endpoints: `/api/auth`, `/api/ai/status`, `/api/ai/models` and `/api/ai/chat`.
 
 ### Task routing
 
@@ -112,7 +115,7 @@ AMALIAI_MODEL_ASSIST=gpt-5.6-luna,gpt-5.6-terra,deepseek-v4p1-flash
 AMALIAI_MODEL_FACTCHECK=glm-5p3-flash,qwen3p8-max
 ```
 
-If a line is missing, the defaults in `server/amaliai.ts` apply. These are the same as above:
+If a line is missing, the defaults in `server/core.ts` apply. These are the same as above:
 
 | Job | Default model | Backups | Why |
 | --- | --- | --- | --- |
@@ -122,6 +125,26 @@ If a line is missing, the defaults in `server/amaliai.ts` apply. These are the s
 | `factcheck`: before export | glm-5p3-flash | qwen3p8-max | A different maker catches different mistakes; GLM checks a batch in ~35s, Qwen is slower |
 
 To switch a model, change its name in `.env` and reload the app. No restart is needed. Keep all client-facing writing (`write`, plus `assist` for rewrites) in one model family so the tone doesn't feel stitched together. Approvers can also override a job's model from the sidebar badge, for testing, in that browser only. Everyone else sees the models read-only. If a model rejects the `temperature` setting, as some reasoning models do, the proxy retries without it.
+
+## Deploy to Vercel
+
+The repo is ready for Vercel: `vercel.json` sets the build, gives the AI function up to 300 seconds (fact checks are slow), and makes page refreshes on links like `/proposals` work.
+
+1. On [vercel.com](https://vercel.com), choose **Add New → Project**, import the GitHub repo, and keep the detected settings (framework **Vite**).
+2. Under **Settings → Environment Variables**, add the same values as your local `.env`:
+
+   | Name | Value |
+   | --- | --- |
+   | `AMALIAI_BASE_URL` | the AmaliAI URL, ending in `/v1` |
+   | `AMALIAI_API_KEY` | your key (mark it **Sensitive**) |
+   | `APP_PASSCODE` | the team passcode you'll share with teammates |
+   | `AUTH_SECRET` | optional: any long random text; changing it logs everyone out |
+   | `AMALIAI_MODEL_WRITE` and the other `AMALIAI_MODEL_*` lines | optional: only if you want to change the defaults |
+
+3. **Production branch:** Vercel publishes `main` as the live site. Either merge `develop` into `main` with a pull request, or under **Settings → Git** set the production branch to `develop` while testing. Every other branch push gets its own preview link.
+4. **Deploy.** After changing an environment variable, redeploy so the functions pick it up.
+
+**The passcode:** when `APP_PASSCODE` is set, the app opens on a **Team access** screen. The right passcode gives that browser a signed cookie for 14 days, and every AI request is checked against it on the server, so a forwarded link can't spend the key. Read-only share links (`/share#…`) still open without the passcode. Locally, leave `APP_PASSCODE` empty to skip the screen.
 
 ## Demo data
 

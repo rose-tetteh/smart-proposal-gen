@@ -4,6 +4,7 @@ import { AppShell } from './shell/AppShell';
 import { Dashboard } from './screens/Dashboard';
 import { Proposals } from './screens/Proposals';
 import { SignIn } from './screens/SignIn';
+import { PasscodeGate } from './screens/PasscodeGate';
 import { ShareView } from './screens/ShareView';
 import { Wizard } from './screens/wizard/Wizard';
 import { Editor } from './screens/editor/Editor';
@@ -16,8 +17,11 @@ export function App() {
 
   // The share view is read-only and works without signing in.
   if (loc.pathname.startsWith('/share')) return <ShareView />;
-  if (!user) return <SignIn />;
 
+  return <PasscodeGate>{user ? <Shell /> : <SignIn />}</PasscodeGate>;
+}
+
+function Shell() {
   return (
     <AppShell>
       <Routes>
